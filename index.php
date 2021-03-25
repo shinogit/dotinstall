@@ -36,22 +36,19 @@ try{
   );
 
   // likesが10より小さいものを削除
-  $n = 10;
-  $dbh->query("DELETE FROM posts WHERE likes < $n");
-  // このように直接変数をクエリに書くのはだめ！
-  // なぜなら今回の例でいくと$n = '10 OR 1=1'と値を入力された時に全てのデータが消えてしまうから
+  // SQLインジェクションを想定して下記の値を入力されたとする
   $n = '10 OR 1=1';
-  $dbh->query("DELETE FROM posts WHERE likes < $n");
-  //このような攻撃をsqlインジェクションと呼ぶ
-  
   // プリペアドステートメントを使うことでSQLインジェクションを対策できる
   // PDO ステートメントオブジェクトが返ってくるので、分かりやすい変数名で受ける$stmt
   $stmt = $dbh->prepare("DELETE FROM posts WHERE likes < ?");
-                                      // ここの値を埋め込んでいる箇所(?)のことをプレースホルダと呼ぶ
-  // 49行目と55行目はどちらもPDOステートメントであるが、意味合いが違う
-  // 49行目の方はSQLを安全に処理するための「プリペアドステートメント」で
-  // 55行目の方はクエリの結果を保持した「結果セット」になる
-  
+  //　　うするかというと、 execute() メソッドを PDO ステートメントオブジェクトに対して使い、引数にプレースホルダと紐づける値を配列で渡す。
+  $stmt->execute([$n]);
+  // プリペアドステートメントをつかわないと　DELETE FROM posts WHERE likes < 10 OR 1=1　となって全て削除されてしまうが、今回は使用しているので文字列に変換され下記のようになる
+  // DELETE FROM posts WHERE likes < '10 OR 1=1'
+  // また、 SQL では整数型である likes の条件として文字列を指定した場合、数字として解釈できるところまではそれを使って、それ以降は無視するので、結果としてこちらのクエリは SQL によって下記のように解釈される。
+  // DELETE FROM posts WHERE likes < 10
+
+
   $stmt = $dbh->query("SELECT * FROM posts");
   $posts = $stmt->fetchAll();
   foreach($posts as $post) {
