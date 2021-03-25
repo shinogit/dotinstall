@@ -35,19 +35,7 @@ try{
       ('Arogato', 15)"
   );
 
-  // likesが10より小さいものを削除
-  // SQLインジェクションを想定して下記の値を入力されたとする
-  $label ='[Good!]';
-  $n = 10;
-  
-  $stmt = $dbh->prepare("
-    UPDATE posts SET message = CONCAT(:label, message)
-    WHERE likes > :n
-  ");
-  $stmt->execute([':label' => $label, ':n' => $n]);
 
-  //updateやdeleteしたレコードを数える
-  echo $stmt->rowCount() . 'records update' . PHP_EOL;
 
   $stmt = $dbh->query("SELECT * FROM posts");
   $posts = $stmt->fetchAll();
