@@ -35,12 +35,22 @@ try{
       ('Arogato', 15)"
   );
 
+  // likesが10より小さいものを削除
+  $n = 10;
+  $dbh->query("DELETE FROM posts WHERE likes < $n");
+  // このように直接変数をクエリに書くのはだめ！
+  // なぜなら今回の例でいくと$n = '10 OR 1=1'と値を入力された時に全てのデータが消えてしまうから
+  $n = '10 OR 1=1';
+  $dbh->query("DELETE FROM posts WHERE likes < $n");
+  //このような攻撃をsqlインジェクションと呼ぶ
+  
+
 
   $stmt = $dbh->query("SELECT * FROM posts");
   $posts = $stmt->fetchAll();
   foreach($posts as $post) {
     printf(
-      '%s (%d)' . PHP_EOL,
+      '%s (%d)' .  PHP_EOL,
       $post['message'],
       $post['likes']
     );
