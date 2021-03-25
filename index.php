@@ -44,8 +44,14 @@ try{
   $dbh->query("DELETE FROM posts WHERE likes < $n");
   //このような攻撃をsqlインジェクションと呼ぶ
   
-
-
+  // プリペアドステートメントを使うことでSQLインジェクションを対策できる
+  // PDO ステートメントオブジェクトが返ってくるので、分かりやすい変数名で受ける$stmt
+  $stmt = $dbh->prepare("DELETE FROM posts WHERE likes < ?");
+                                      // ここの値を埋め込んでいる箇所(?)のことをプレースホルダと呼ぶ
+  // 49行目と55行目はどちらもPDOステートメントであるが、意味合いが違う
+  // 49行目の方はSQLを安全に処理するための「プリペアドステートメント」で
+  // 55行目の方はクエリの結果を保持した「結果セット」になる
+  
   $stmt = $dbh->query("SELECT * FROM posts");
   $posts = $stmt->fetchAll();
   foreach($posts as $post) {
