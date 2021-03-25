@@ -35,21 +35,14 @@ try{
       ('Arogato', 15)"
   );
 
-  // likesが10より小さいものを削除
-  // SQLインジェクションを想定して下記の値を入力されたとする
-  $label ='[Good!]';
-  $n = 10;
-  
+  // LIKEを使って文字列検索するときは、クエリの中ではなく変数の方に%を付けないといけない
+  $seach = 't%';
+
   $stmt = $dbh->prepare("
-    UPDATE posts SET message = CONCAT(:label, message)
-    WHERE likes > :n
+  SELECT * FROM posts WHERE message LIKE ?
   ");
-  $stmt->execute([':label' => $label, ':n' => $n]);
+  $stmt->execute([$seach]);
 
-  //updateやdeleteしたレコードを数える
-  echo $stmt->rowCount() . 'records update' . PHP_EOL;
-
-  $stmt = $dbh->query("SELECT * FROM posts");
   $posts = $stmt->fetchAll();
   foreach($posts as $post) {
     printf(
