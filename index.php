@@ -37,17 +37,17 @@ try{
 
   // likesが10より小さいものを削除
   // SQLインジェクションを想定して下記の値を入力されたとする
-  $n = '10 OR 1=1';
-  // プリペアドステートメントを使うことでSQLインジェクションを対策できる
-  // PDO ステートメントオブジェクトが返ってくるので、分かりやすい変数名で受ける$stmt
-  $stmt = $dbh->prepare("DELETE FROM posts WHERE likes < ?");
-  //　　うするかというと、 execute() メソッドを PDO ステートメントオブジェクトに対して使い、引数にプレースホルダと紐づける値を配列で渡す。
-  $stmt->execute([$n]);
-  // プリペアドステートメントをつかわないと　DELETE FROM posts WHERE likes < 10 OR 1=1　となって全て削除されてしまうが、今回は使用しているので文字列に変換され下記のようになる
-  // DELETE FROM posts WHERE likes < '10 OR 1=1'
-  // また、 SQL では整数型である likes の条件として文字列を指定した場合、数字として解釈できるところまではそれを使って、それ以降は無視するので、結果としてこちらのクエリは SQL によって下記のように解釈される。
-  // DELETE FROM posts WHERE likes < 10
+  $label ='[Good!]';
+  $n = 10;
+  
+  $stmt = $dbh->prepare("
+    UPDATE posts SET message = CONCAT(:label, message)
+    WHERE likes > :n
+  ");
+  $stmt->execute([':label' => $label, ':n' => $n]);
 
+  //updateやdeleteしたレコードを数える
+  echo $stmt->rowCount() . 'records update' . PHP_EOL;
 
   $stmt = $dbh->query("SELECT * FROM posts");
   $posts = $stmt->fetchAll();
